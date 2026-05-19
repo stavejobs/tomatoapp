@@ -14,7 +14,9 @@ CREATE TABLE IF NOT EXISTS plans (
   color TEXT NOT NULL,
   completed BOOLEAN DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  completed_at DATETIME
+  completed_at DATETIME,
+  expires_at DATETIME,
+  reminded BOOLEAN DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_plans_type ON plans(type);

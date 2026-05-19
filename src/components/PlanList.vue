@@ -8,7 +8,7 @@
         :key="plan.id"
         class="plan-item"
         :style="{ borderLeft: `4px solid ${plan.color}` }"
-        :class="{ completed: plan.completed }"
+        :class="{ completed: plan.completed, expired: isExpired(plan) }"
       >
         <input
           type="checkbox"
@@ -17,6 +17,10 @@
         />
         <span class="plan-content">{{ plan.content }}</span>
         <span class="plan-type">{{ getTypeLabel(plan.type) }}</span>
+        <span v-if="isExpired(plan)" class="expired-tag">已过期</span>
+        <span v-else-if="plan.countdown && plan.countdown > 0 && !plan.completed" class="countdown">
+          {{ formatCountdownText(plan.countdown) }}
+        </span>
         <button @click="$emit('delete', plan.id)" class="delete-btn">删除</button>
       </div>
     </div>
@@ -24,9 +28,12 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   plans: Array,
-  loading: Boolean
+  loading: Boolean,
+  now: { type: Number, default: 0 }
 })
 
 defineEmits(['toggle', 'delete'])
@@ -40,6 +47,23 @@ const TYPE_LABELS = {
 
 function getTypeLabel(type) {
   return TYPE_LABELS[type] || type
+}
+
+function isExpired(plan) {
+  if (plan.completed) return false
+  if (plan.expired) return true
+  if (plan.expires_at) {
+    return new Date(plan.expires_at).getTime() <= Date.now()
+  }
+  return false
+}
+
+function formatCountdownText(seconds) {
+  if (!seconds || seconds <= 0) return ''
+  const hours = Math.floor(seconds / 3600)
+  const mins = Math.floor((seconds % 3600) / 60)
+  if (hours > 0) return `${hours}时${mins}分`
+  return `${mins}分`
 }
 </script>
 
@@ -63,6 +87,10 @@ function getTypeLabel(type) {
   opacity: 0.6;
 }
 
+.plan-item.expired {
+  background: rgba(255, 68, 68, 0.1);
+}
+
 .plan-content {
   flex: 1;
 }
@@ -72,6 +100,19 @@ function getTypeLabel(type) {
   padding: 0.2rem 0.5rem;
   background: rgba(0,0,0,0.1);
   border-radius: 3px;
+}
+
+.countdown {
+  font-size: 0.8rem;
+  color: #ff9800;
+  white-space: nowrap;
+}
+
+.expired-tag {
+  font-size: 0.8rem;
+  color: #ff4444;
+  font-weight: bold;
+  white-space: nowrap;
 }
 
 .delete-btn {

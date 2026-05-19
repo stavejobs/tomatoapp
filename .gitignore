@@ -1,6 +1,8 @@
 node_modules/
 dist/
+tomato-app/
 .DS_Store
 *.log
 .vscode/
 .idea/
+wrangler.local.toml
