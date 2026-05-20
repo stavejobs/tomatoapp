@@ -7,24 +7,6 @@ const PLAN_COLORS = {
   longterm: '#96CEB4'
 }
 
-function calculateExpiresAt(type) {
-  if (type === 'longterm') return null
-  const now = new Date()
-  switch (type) {
-    case 'daily':
-      return new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
-    case 'weekly': {
-      const dayOfWeek = now.getDay()
-      const daysUntilSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek
-      return new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilSunday).toISOString()
-    }
-    case 'monthly':
-      return new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString()
-    default:
-      return null
-  }
-}
-
 function getRemainingSeconds(expiresAt) {
   if (!expiresAt) return null
   const diff = new Date(expiresAt).getTime() - Date.now()
@@ -97,15 +79,13 @@ export function usePlans() {
 
   async function addPlan(content, type) {
     try {
-      const expiresAt = calculateExpiresAt(type)
       const res = await fetch('/api/plans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content,
           type,
-          color: PLAN_COLORS[type],
-          expires_at: expiresAt
+          color: PLAN_COLORS[type]
         })
       })
       const newPlan = await res.json()
